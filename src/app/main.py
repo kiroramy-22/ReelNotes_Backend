@@ -1,23 +1,27 @@
 from fastapi import FastAPI
+from contextlib import asynccontextmanager
 from app.core.config import settings
 from app.routers import users
 from app.routers import auth
 from app.session import create_db_and_tables
 
-DDDDD = FastAPI(
-    title=settings.PROJECT_NAME,
-    openapi_url=f"{settings.API_V1_STR}/openapi.json"
+app = FastAPI(
+    title=settings.PROJECT_NAME, openapi_url=f"{settings.API_V1_STR}/openapi.json"
 )
-@DDDDD.on_event("startup")
-def on_startup():
+
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
     create_db_and_tables()
+    yield
+
 
 # Include routers
-DDDDD.include_router(auth.router)
-DDDDD.include_router(users.router, prefix=settings.API_V1_STR)
-@DDDDD.get("/")
+app.include_router(auth.router, prefix=settings.API_V1_STR)
+app.include_router(users.router, prefix=settings.API_V1_STR)
+
+
+@app.get("/")
 async def root():
     return {"message": "Welcome to FastAPI JWT Auth Example"}
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)
+

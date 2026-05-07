@@ -1,7 +1,9 @@
-from sqlmodel import Field, SQLModel,Column,JSON
+from sqlmodel import Field, SQLModel, Column, JSON
+import uuid
+
 
 class UserDB(SQLModel, table=True):
-    id: int | None = Field(default=None, primary_key=True)
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()), primary_key=True)
     username: str
     email: str
     password: str

@@ -12,36 +12,40 @@ from app.core.config import settings
 from sqlmodel import select
 from app.db.user import UserDB
 
-router = APIRouter(prefix=f"{settings.API_V1_STR}/auth", tags=["auth"])
+router = APIRouter(prefix="/auth", tags=["auth"])
+
+
 @router.post("/login", response_model=Token)
 async def login_for_access_token(
-   session:SessionDep, form_data: OAuth2PasswordRequestForm = Depends()
-) -> Any:
+    session: SessionDep, form_data: OAuth2PasswordRequestForm = Depends()
+) -> Token:
     """
     OAuth2 compatible token login, returns an access token
     """
-    user =session.exec(select(UserDB).where(UserDB.username == form_data.username)).first()
+    user = session.exec(
+        select(UserDB).where(UserDB.username == form_data.username)
+    ).first()
     if not user or not verify_password(form_data.password, user.password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect email or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    
+
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
-        subject=user.email,
-        roles=user.roles,
-        expires_delta=access_token_expires
+        subject=user.email, roles=user.roles, expires_delta=access_token_expires
     )
     refresh_token = create_refresh_token(subject=user.email)
-    return {
-        "access_token": access_token,
-        "refresh_token": refresh_token,
-        "token_type": "bearer"
-    }
+    return Token(
+        access_token=access_token,
+        refresh_token=refresh_token,
+        token_type="bearer",
+    )
+
+
 @router.post("/refresh", response_model=Token)
-async def refresh_token(session:SessionDep,refresh_token: str = Body(...)) -> Any:
+async def refresh_token(session: SessionDep, refresh_token: str = Body(...)) -> Token:
     """
     Refresh token endpoint
     """
@@ -61,28 +65,27 @@ async def refresh_token(session:SessionDep,refresh_token: str = Body(...)) -> An
                 detail="Could not validate credentials",
                 headers={"WWW-Authenticate": "Bearer"},
             )
-        user =session.exec(select(UserDB).where(UserDB.email ==email)).first()
+        user = session.exec(select(UserDB).where(UserDB.email == email)).first()
         if user is None:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="User not found",
             )
-        
+
         access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
         access_token = create_access_token(
-            subject=email,
-            roles=user.roles,
-            expires_delta=access_token_expires
+            subject=email, roles=user.roles, expires_delta=access_token_expires
         )
         new_refresh_token = create_refresh_token(subject=email)
-        return {
-            "access_token": access_token,
-            "refresh_token": new_refresh_token,
-            "token_type": "bearer"
-        }
+        return Token(
+            access_token=access_token,
+            refresh_token=new_refresh_token,
+            token_type="bearer",
+        )
     except (JWTError, ValidationError):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Could not validate credentials",
             headers={"WWW-Authenticate": "Bearer"},
         )
+
