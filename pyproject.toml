@@ -1,5 +1,5 @@
 [project]
-name = "ddddd"
+name = "app"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
@@ -13,11 +13,20 @@ dependencies = [
   "sqlmodel",
 ]
 
+[dependency-groups]
+dev = ["pytest>=9.0.3"]
+
 [tool.fastapi]
-entrypoint = "src/app/main:app"
+entrypoint = "app.main:app"
 
 [tool.ruff.lint]
 dummy-variable-rgx = "^_.*$"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
 
 [tool.uv.workspace]
 members = ["reel_notes_backend"]

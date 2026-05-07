@@ -4,12 +4,11 @@ from app.db.user import UserDB
 from app.models.user import User
 from sqlmodel import select
 from app.session import SessionDep
-# For demonstration
 
-router = APIRouter(prefix="/users", tags=["users"])
+router = APIRouter(prefix="/user", tags=["user"])
 
 
-@router.get("/me", response_model=User)
+@router.get("/me", response_model=User, operation_id="get_current_user")
 async def read_users_me(
     session: SessionDep, current_user: str = Depends(get_current_user)
 ) -> User:
@@ -22,4 +21,3 @@ async def read_users_me(
             status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
         )
     return User.model_validate(user, from_attributes=True)
-

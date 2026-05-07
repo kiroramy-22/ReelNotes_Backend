@@ -15,7 +15,7 @@ from app.db.user import UserDB
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 
-@router.post("/login", response_model=Token)
+@router.post("/login", response_model=Token, operation_id="login_user")
 async def login_for_access_token(
     session: SessionDep, form_data: OAuth2PasswordRequestForm = Depends()
 ) -> Token:
@@ -44,7 +44,7 @@ async def login_for_access_token(
     )
 
 
-@router.post("/refresh", response_model=Token)
+@router.post("/refresh", response_model=Token, operation_id="refresh_token")
 async def refresh_token(session: SessionDep, refresh_token: str = Body(...)) -> Token:
     """
     Refresh token endpoint
@@ -88,4 +88,3 @@ async def refresh_token(session: SessionDep, refresh_token: str = Body(...)) -> 
             detail="Could not validate credentials",
             headers={"WWW-Authenticate": "Bearer"},
         )
-
