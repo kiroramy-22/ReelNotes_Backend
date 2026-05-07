@@ -1,7 +1,5 @@
 from datetime import timedelta
-from typing import Any
 from fastapi import APIRouter, Body, Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordRequestForm
 from jose import JWTError
 from pydantic import ValidationError
 from app.auth.jwt_handler import create_access_token, create_refresh_token, decode_token
@@ -11,14 +9,13 @@ from app.models.token import Token
 from app.core.config import settings
 from sqlmodel import select
 from app.db.user import UserDB
+from app.models.user import LoginRequest, SignupRequest
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 
 @router.post("/login", response_model=Token, operation_id="login_user")
-async def login_for_access_token(
-    session: SessionDep, form_data: OAuth2PasswordRequestForm = Depends()
-) -> Token:
+async def login_for_access_token(session: SessionDep, form_data: LoginRequest) -> Token:
     """
     OAuth2 compatible token login, returns an access token
     """
@@ -88,3 +85,8 @@ async def refresh_token(session: SessionDep, refresh_token: str = Body(...)) -> 
             detail="Could not validate credentials",
             headers={"WWW-Authenticate": "Bearer"},
         )
+
+
+@router.post("/sigup", operation_id="signup_user")
+async def signup_user(sigup: SignupRequest) -> Token:
+    raise NotImplementedError("Signup endpoint is not implemented yet")

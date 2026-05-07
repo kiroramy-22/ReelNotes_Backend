@@ -24,4 +24,3 @@ app.include_router(users.router, prefix=settings.API_V1_STR)
 @app.get("/")
 async def root():
     return {"message": "Welcome to FastAPI JWT Auth Example"}
-

@@ -16,3 +16,14 @@ class User(UserBase):
     id: str
     username: str
     roles: List[str] = ["user"]
+
+
+class LoginRequest(BaseModel):
+    username: str
+    password: str
+
+
+class SignupRequest(BaseModel):
+    username: str
+    email: EmailStr
+    password: str
