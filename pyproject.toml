@@ -1,12 +1,32 @@
 [project]
-name = "ddddd"
+name = "app"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.14"
-dependencies = []
+dependencies = [
+  "email-validator",
+  "fastapi[standard]",
+  "passlib[bcrypt]",
+  "python-jose[cryptography]",
+  "python-multipart",
+  "sqlmodel",
+]
+
+[dependency-groups]
+dev = ["pytest>=9.0.3"]
+
+[tool.fastapi]
+entrypoint = "app.main:app"
+
+[tool.ruff.lint]
+dummy-variable-rgx = "^_.*$"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
 
 [tool.uv.workspace]
-members = [
-    "reel_notes_backend",
-]
+members = ["reel_notes_backend"]
